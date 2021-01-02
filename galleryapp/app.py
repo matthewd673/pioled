@@ -33,7 +33,7 @@ def draw_image(b64_data):
 
 	#resize by width
 	max_width = 128;
-	w_ratio = max_width/float(image.size[0])
+	w_ratio = (max_width/float(image.size[0]))
 	r_height = int((float(image.size[1]) * float(w_ratio)))
 	image = image.resize((max_width, r_height), Image.ANTIALIAS)
 
