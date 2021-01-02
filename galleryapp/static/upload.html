@@ -8,6 +8,7 @@
 		<p>Image URL:</p>
 		<input type="text" id="image_url"><br>
 		<button id="grab_button">Grab Image</button><br>
+		<p><i>Click Grab Image until the image is displayed below</i></p>
 
 		<form action="/uploadb64/", method="post">
 			<p><b>OR:</b>base64 String:</p>
@@ -15,8 +16,8 @@
 			<input type="submit" value="Draw Image">
 		</form>
 
-		<div style="display: none">
-			<img id="preview" crossorigin="anonymous">
+		<div>
+			<img id="preview" style="display: none" crossorigin="anonymous">
 			<canvas id="canvas"/>
 		</div>
 
@@ -32,11 +33,11 @@
 			function urlGetButton() {
 				var url = document.getElementById("image_url").value;
 				
-				document.getElementById("preview").src = url;
+				var img = document.getElementById("preview");
+				img.src = url;
 
 				var canvas = document.getElementById("canvas");
 				var context = canvas.getContext("2d");
-				var img = document.getElementById("preview");
 				context.drawImage(img, 0, 0);
 				
 				document.getElementById("image_b64").value = canvas.toDataURL().split(";base64,")[1];
