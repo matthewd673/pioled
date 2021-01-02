@@ -18,7 +18,7 @@
 
 		<div>
 			<img id="preview" style="display: none" crossorigin="anonymous">
-			<canvas id="canvas"/>
+			<canvas id="canvas" width="128" height="32"/>
 		</div>
 
 		<script>
@@ -38,7 +38,7 @@
 
 				var canvas = document.getElementById("canvas");
 				var context = canvas.getContext("2d");
-				context.drawImage(img, 0, 0);
+				context.drawImage(img, 0, 0, 128, 32);
 				
 				document.getElementById("image_b64").value = canvas.toDataURL().split(";base64,")[1];
 
