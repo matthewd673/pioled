@@ -4,7 +4,7 @@ import adafruit_ssd1306
 from PIL import Image
 from io import BytesIO
 import base64
-from flask import Flask, request
+from flask import Flask, request, render_template
 
 #---PIOLED---
 #setup
@@ -27,13 +27,23 @@ def push_error(c_val, error, factor):
 def draw_image(b64_data):
 
 	print ("loading image")
+	
 	#load image, get properties
 	image = Image.open(BytesIO(base64.b64decode(b64_data)))
+
+	#resize by width
+	max_width = 128;
+	w_ratio = max_width/float(image.size[0])
+	r_height = int((float(image.size[1]) * float(w_ratio)))
+	image = image.resize((max_width, r_height), Image.ANTIALIAS)
+
+	#convert to rgb, get properties
 	rgb_image = image.convert('RGB')
 	width, height = image.size
 
 	print ("width: " + str(width) + " height: " + str(height))
 
+	#limit width and height when drawing
 	if width > 128:
 		width = 128
 	if height > 32:
@@ -97,7 +107,7 @@ app = Flask(__name__, static_url_path='/static/')
 
 @app.route('/')
 def index():
-	return "/upload to upload, /clear to clear"
+	return render_template("index.html", message="Welcome!")
 
 @app.route('/upload')
 def route_upload():
@@ -115,7 +125,7 @@ def route_acceptb64():
 		image_b64 = post_data.get('image_b64')
 		print (image_b64)
 		draw_image(image_b64)
-		return "Completed draw"
+		return render_template("index.html", message="Completed draw!")
 
 @app.route('/clear')
 def route_clear():
