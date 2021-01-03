@@ -3,6 +3,11 @@ import busio
 import adafruit_ssd1306
 import asyncio
 import websockets
+import logging
+
+logger = logging.getLogger('websockets')
+logger.setLevel(logging.INFO)
+logger.addHandler(logging.StreamHandler())
 
 print("Draw server running");
 
