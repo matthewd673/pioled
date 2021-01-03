@@ -19,8 +19,8 @@ display = adafruit_ssd1306.SSD1306_I2C(128, 32, i2c)
 display.fill(0)
 display.show()
 
-async def draw(websocket, path):
-    message = await websockets.recv()
+async def draw(socket, path):
+    message = await socket.recv()
     data = message.split(',')
 
     x = int(data[0])
@@ -33,7 +33,7 @@ async def draw(websocket, path):
     display.show()
 
 
-server = websockets.serve(draw, "localhost", 5000)
+server = websockets.serve(draw, "0.0.0.0", 5000)
 
 asyncio.get_event_loop().run_until_complete(server)
 asyncio.get_event_loop().run_forever()
