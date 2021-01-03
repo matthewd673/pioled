@@ -4,6 +4,8 @@ import adafruit_ssd1306
 import asyncio
 import websockets
 
+print("Draw server running");
+
 #setup
 i2c = busio.I2C(SCL, SDA)
 display = adafruit_ssd1306.SSD1306_I2C(128, 32, i2c)
@@ -13,12 +15,14 @@ display.fill(0)
 display.show()
 
 async def draw(websocket, path):
-    coords = await websockets.recv()
-    c_array = coords.split(',')
+    message = await websockets.recv()
+    data = message.split(',')
 
-    x = c_array[0]
-    y = c_array[1]
-    fill = c_array[2]
+    x = int(data[0])
+    y = int(data[1])
+    fill = int(data[2])
+
+    print ("Filling " + str(fill) + " at (" + str(x) + ", " + str(y) + ").")
 
     display.pixel(x, y, fill)
     display.show()
