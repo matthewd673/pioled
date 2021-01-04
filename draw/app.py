@@ -20,17 +20,21 @@ display.fill(0)
 display.show()
 
 async def draw(socket, path):
-    message = await socket.recv()
-    data = message.split(',')
+    while True:
+        try:
+            message = await socket.recv()
+            data = message.split(',')
 
-    x = int(data[0])
-    y = int(data[1])
-    fill = int(data[2])
+            x = int(data[0])
+            y = int(data[1])
+            fill = int(data[2])
 
-    print ("Filling " + str(fill) + " at (" + str(x) + ", " + str(y) + ").")
+            print ("Filling " + str(fill) + " at (" + str(x) + ", " + str(y) + ").")
 
-    display.pixel(x, y, fill)
-    display.show()
+            display.pixel(x, y, fill)
+            display.show()
+        except websockets.ConnectionClosed:
+            print("Connection closed");
 
 
 server = websockets.serve(draw, "0.0.0.0", 5000)
