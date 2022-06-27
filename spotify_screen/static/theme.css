@@ -1,0 +1,26 @@
+html {
+        font-family: 'Arial', sans-serif;
+}
+body {
+        display: flex;
+        justify-content: center;
+}
+.page-container {
+        padding-top: 64px;
+        max-width: 600px;
+}
+.banner {
+        border: 1px solid black;
+        border-radius: 4px;
+        padding: 20px 16px;
+}
+.noauth-banner {
+        background-color: pink;
+        border-color: maroon;
+        color: maroon;
+}
+.auth-banner {
+        background-color: lightgreen;
+        border-color: darkgreen;
+        color: darkgreen;
+}

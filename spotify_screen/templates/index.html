@@ -1,0 +1,27 @@
+<html>
+        <head>
+                <title>spotify_screen</title>
+                <link rel="stylesheet" href="{{ url_for('static', filename='theme.css') }}" />
+        </head>
+        <body>
+                <div class="page-container">
+                <h1>spotify_screen</h1>
+                <p>If you're reading this, the <b>spotify_screen</b> server is up and running!</p>
+                <br>
+                {% if hasAuth %}
+                        <p class="banner auth-banner">You are authenticated with Spotify, if something's broken check the dashboard.</p>
+                {% endif %}
+                {% if not hasAuth %}
+                        <p class="banner noauth-banner">You are not authenticated with Spotify. Please complete authentication below.</p>
+                {% endif %}
+                <br>
+                <h3>Tools</h3>
+                <ul>
+                        <li><a href="auth">Authentication</a></li>
+                        <li><a href="dashboard">Dashboard</a></li>
+                </ul>
+                <br>
+                <a href="https://github.com/matthewd673">@matthewd673</a>
+                </div>
+        </body>
+</html>
