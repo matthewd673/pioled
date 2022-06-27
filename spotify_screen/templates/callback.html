@@ -1,0 +1,21 @@
+<html>
+	<head>
+		<title>spotify_screen callback</title>
+		<link rel="stylesheet" href="{{ url_for('static', filename='theme.css') }}" />
+	</head>
+	<body>
+		<div class="page-container">
+		<h1>spotify_screen</h1>
+		<p>The Spotify OAuth flow is complete</p>
+		<br>
+		{% if success %}
+		<p class="banner success-banner">{{ api_message }}</p>
+		{% endif %}
+		{% if not success %}
+		<p class="banner error-banner">{{ api_message }}</p>
+		{% endif %}
+		<br>
+		<a href="/">Return home</a>
+		</div>
+	</body>
+</html>

@@ -9,7 +9,22 @@ import busio
 import adafruit_ssd1306
 from PIL import Image, ImageDraw, ImageFont
 
+API_GOT204_RETRY_SECS = 10
+API_MIDSONG_DOUBLECHECK_SECS = 10
+API_REFRESH_BUFFER_SECS = 15
+PLAYER_SONGENDED_BUFFER_MS = -6000
+
+client_id = os.getenv('SPOTIFY_CLIENT_ID')
+client_secret = os.getenv('SPOTIFY_CLIENT_SECRET')
+access_token = ''
+refresh_token = ''
+
+refresh_time = 0
+
 def main():
+	global access_token
+	global refresh_token
+
 	print('Starting screen.py...')
 
 	if len(sys.argv) < 3:
@@ -24,15 +39,14 @@ def main():
 	access_token = sys.argv[1]
 	refresh_token = sys.argv[2]
 
-	print('Access Token: ' + access_token)
-	print('Refresh Token: ' + refresh_token)
+	refresh_access_token()
 
 	while True:
-		loop(display, access_token)
+		loop(display)
 
-def loop(display, access_token):
+def loop(display):
 	print('Making request...')
-	data = get_currently_playing(access_token)
+	data = get_currently_playing()
 
 	image = Image.new("1", (display.width, display.height))
 	draw = ImageDraw.Draw(image)
@@ -42,7 +56,7 @@ def loop(display, access_token):
 		print('No data to display')
 		display.fill(0)
 		display.show()
-		time.sleep(3*60)
+		time.sleep(API_GOT204_RETRY_SECS)
 		return
 
 	# grab stats
@@ -51,30 +65,40 @@ def loop(display, access_token):
 	name = data['item']['name']
 	artist_1 = data['item']['artists'][0]['name']
 	art_url = data['item']['album']['images'][2]['url']
+	is_playing = data['is_playing']
 
 	draw.rectangle((0, 0, display.width, display.height), outline=0, fill=0) # clear
 
 	# draw text
-	draw_text(draw, 36, 2, name, font)
-	draw_text(draw, 36, 10, artist_1, font)
+	draw_text(draw, 34, 2, name, font)
+	draw_text(draw, 34, 10, artist_1, font)
 
 	display.image(image)
+	display.show()
 
 	# draw album art (manually)
 	if art_url != None:
-		draw_image(display, 2, 2, download_image(art_url), 32, 32)
+		draw_image(display, 0, 0, download_image(art_url), 32, 32)
 
 	# draw progress until song is over
-	while progress < duration + 500:
-		print('Drawing...')
-		draw_line(display, 36, 24, 90, 3, progress, duration)
-		# draw_line(display, 36, 25, 90, 1, 1, 1)
+	secs_since_api_check = 0
+	while progress < duration + PLAYER_SONGENDED_BUFFER_MS:
+		if secs_since_api_check > API_MIDSONG_DOUBLECHECK_SECS: # double check with api
+			new_data = get_currently_playing()
+			if new_data['item']['name'] != name: # new song started
+				break
+			# same song, just double check position
+			progress = new_data['progress_ms']
+			is_playing = data['is_playing']
+			secs_since_api_check = 0
 
-		# print('Drawing...')
-		# display.image(image)
+		draw_line(display, 34, 24, 90, 3, progress, duration)
 		display.show()
 
-		progress += 1000;
+		if is_playing:
+			progress += 1000
+
+		secs_since_api_check += 1
 		time.sleep(1)
 
 def draw_clear(draw):
@@ -90,6 +114,7 @@ def draw_line(display, x, y, width, height, val, max_val):
 			display.pixel(i, j, 255)
 
 def draw_image(display, x, y, draw_img, width, height):
+	draw_img = draw_img.resize((width, height), Image.ANTIALIAS) # resize to match width and height
 	rgb_image = draw_img.convert('RGB') # necessary??
 	# apply dithering
 	for j in range(height - 1):
@@ -149,19 +174,51 @@ def download_image(url):
 	else:
 		print('Image get error')
 
-def get_currently_playing(access_token):
+def get_currently_playing():
+	global access_token
+
+	refresh_access_token()
+
+	status_url = 'https://api.spotify.com/v1/me/player/currently-playing'
 	headers = {}
 	headers['Accept'] = 'application/json'
 	headers['Authorization'] = 'Bearer ' + access_token
-	r = requests.get('https://api.spotify.com/v1/me/player/currently-playing', headers=headers)
+	status_request = requests.get(status_url, headers=headers)
 
-	print('Completed request, got ' + str(r.status_code))
+	print('Completed request, got ' + str(status_request.status_code))
 
-	if r.status_code == 204: # no content
+	if status_request.status_code == 204: # no content
 		return {}
 
-	data = r.json()
+	data = status_request.json()
 	return data
+
+def refresh_access_token():
+	global refresh_time
+	global access_token
+	global refresh_token
+
+	if refresh_time - get_time_secs() > API_REFRESH_BUFFER_SECS: # nothing to worry about
+		return;
+
+	print('Refreshing access_token...')
+	auth_url = 'https://accounts.spotify.com/api/token'
+	form = {
+		'grant_type': 'refresh_token',
+		'refresh_token': refresh_token
+	}
+	auth_request = requests.post(auth_url, data=form, auth=(client_id, client_secret))
+
+	if auth_request.status_code == 200:
+		print('Auth refresh success')
+		data = auth_request.json()
+		access_token = data['access_token']
+		refresh_time = get_time_secs() + (data['expires_in'])
+	else:
+		print('Auth refresh failed')
+
+def get_time_secs():
+	return int(round(time.time()))
 
 if __name__ == '__main__':
 	main()

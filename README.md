@@ -2,6 +2,10 @@
 
 A series of experiments with a small OLED screen for Raspberry Pi.
 
+### spotify_screen/
+
+Spotify playback visualizer powered by the Spotify API with a Flask frontend.
+
 ### draw/
 
 Powered by flask and WebSockets, the Pi hosts a page with a spring canvas.

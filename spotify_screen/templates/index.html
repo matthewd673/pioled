@@ -9,10 +9,10 @@
                 <p>If you're reading this, the <b>spotify_screen</b> server is up and running!</p>
                 <br>
                 {% if hasAuth %}
-                        <p class="banner auth-banner">You are authenticated with Spotify, if something's broken check the dashboard.</p>
+                        <p class="banner success-banner">You are authenticated with Spotify, if something's broken check the dashboard.</p>
                 {% endif %}
                 {% if not hasAuth %}
-                        <p class="banner noauth-banner">You are not authenticated with Spotify. Please complete authentication below.</p>
+                        <p class="banner error-banner">You are not authenticated with Spotify. Please complete authentication below.</p>
                 {% endif %}
                 <br>
                 <h3>Tools</h3>
